@@ -1,5 +1,6 @@
 <template>
-  <ScrollPane class="component-render-details">
+<SplitPane>
+  <ScrollPane slot="left" class="component-render-details">
     <div
       v-if="!entry"
       class="vue-ui-empty"
@@ -36,6 +37,7 @@
           v-for="e of entries"
           :key="e.id"
           class="metric selectable-item"
+          @click="selectedHookInfo = e"
         >
           <div
             class="type"
@@ -76,6 +78,32 @@
       </div>
     </template>
   </ScrollPane>
+  <ScrollPane slot="right">
+    <template v-if="selectedHookInfo">
+      <ActionHeader slot="header">
+        <span class="title">
+          <span>{{ selectedHookInfo.id }}</span>
+        </span>
+      </ActionHeader>
+      <div
+        slot="scroll"
+        class="hook-detail-box"
+        :class="{
+          'high-density': highDensity
+        }"
+      >
+        <div class="header">
+          <div>path</div>
+          <div>count</div>
+        </div>
+        <div v-for="(val, key) of selectedHookInfo.map" :key="key" class="row">
+          <div>{{key}}</div>
+          <div>{{val}}</div>
+        </div>
+      </div>
+    </template>
+  </ScrollPane>
+</SplitPane>
 </template>
 
 <script>
@@ -83,6 +111,7 @@ import { getComponentDisplayName } from '@utils/util'
 
 import ScrollPane from '@front/components/ScrollPane.vue'
 import ActionHeader from '@front/components/ActionHeader.vue'
+import SplitPane from '@front/components/SplitPane.vue'
 
 const ENTRIES = [
   'beforeCreate',
@@ -107,13 +136,20 @@ const COLUMNS = [
 export default {
   components: {
     ScrollPane,
-    ActionHeader
+    ActionHeader,
+    SplitPane
   },
 
   props: {
     entry: {
       type: Object,
       default: null
+    }
+  },
+
+  data () {
+    return {
+      selectedHookInfo: null
     }
   },
 
@@ -135,6 +171,12 @@ export default {
     }
   },
 
+  watch: {
+    entry() {
+      this.selectedHookInfo = null;
+    }
+  },
+
   created () {
     this.columns = COLUMNS
   }
@@ -148,6 +190,7 @@ export default {
   top -1px
 
 .metrics
+  min-width 600px
   padding 6px 0
   font-size 14px
   &.high-density
@@ -176,4 +219,17 @@ export default {
 
 .type
   color $green
+
+
+.hook-detail-box
+  font-size 14px
+  .header,.row
+    display flex
+    > *
+      padding: 4px 10px;
+      word-break break-all
+      &:not(:first-child)
+        text-align right
+      &:first-child
+        flex: 80% 0 0
 </style>

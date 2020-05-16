@@ -1,5 +1,5 @@
 import SharedData, { watch } from '@utils/shared-data'
-import { getComponentName } from '@utils/util'
+import { getComponentName, getComponentAbsolutePath } from '@utils/util'
 
 const COMPONENT_HOOKS = [
   'beforeCreate',
@@ -128,6 +128,7 @@ function applyHooks (vm) {
 
 function addComponentMetric (options, type, start, end) {
   const duration = end - start
+  const path = getComponentAbsolutePath(options)
   const name = getComponentName(options)
 
   const metric = componentMetrics[name] = componentMetrics[name] || {
@@ -138,10 +139,17 @@ function addComponentMetric (options, type, start, end) {
 
   const hook = metric.hooks[type] = metric.hooks[type] || {
     count: 0,
-    totalTime: 0
+    totalTime: 0,
+    map: {}
   }
   hook.count++
   hook.totalTime += duration
+  // 分配统计组件在不同路径下的渲染次数
+  if (hook.map[path]) {
+    hook.map[path]++
+  } else {
+    hook.map[path] = 1
+  }
 
   metric.totalTime += duration
 

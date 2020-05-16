@@ -644,3 +644,16 @@ export function copyToClipboard (state) {
   document.execCommand('copy')
   document.body.removeChild(dummyTextArea)
 }
+
+/**
+ * 递归获取组件的绝对路径
+ * @param {*} options Vue实例上的$options
+ */
+export function getComponentAbsolutePath (options) {
+  const path = getComponentName(options)
+  if (options.parent && options.parent.$options && getComponentName(options.parent.$options)) {
+    return `${getComponentAbsolutePath(options.parent.$options)}/${path}`
+  } else {
+    return path
+  }
+}
